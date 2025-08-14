@@ -1,6 +1,6 @@
 # MC656
 
-FitPlanner — Seu Organizador Inteligente de Treinos
+BeeFit — Seu Organizador Inteligente de Treinos
 
 FitPlanner é um aplicativo mobile projetado para organizar, otimizar e acompanhar treinos de academia, tanto para atletas iniciantes quanto para os mais avançados.
 Com integração a dispositivos inteligentes e recursos avançados de personalização, o app ajuda você a treinar de forma mais eficiente, monitorando seu progresso e tornando o treino mais motivador.
