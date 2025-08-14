@@ -1,4 +1,4 @@
-# MC656
+# BeeFit
 
 BeeFit — Seu Organizador Inteligente de Treinos
 
@@ -75,5 +75,3 @@ Backend: API REST + integração com LLM
 Banco de Dados: PostgreSQL / MongoDB
 
 Integrações: APIs de wearables (Google Fit, Apple Health, etc.)
-
-Hospedagem: [inserir provedor]
