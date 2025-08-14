@@ -1,4 +1,4 @@
-    Nome do Cicrano (RAYYYYY)
+    Nome do Cycrano (RAZZZZZ)
     Nome do Fulano  (RAXXXXX)
     Nome do Fulano  (RAXXXXX)
     Nome do Fulano  (RAXXXXX)
