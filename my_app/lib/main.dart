@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   final List<String> _pageTitles = [
-    'Treino',
+    'Treino do Dia: Peito e Tríceps',
     'Perfil',
   ];
 
@@ -94,19 +94,68 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// Modelo de dados para um exercício
+class Exercise {
+  final String name;
+  final String series;
+
+  // --- CORREÇÃO APLICADA AQUI ---
+  // Adicionado 'const' ao construtor
+  const Exercise({required this.name, required this.series});
+}
+
 class TrainingPage extends StatelessWidget {
   const TrainingPage({Key? key}) : super(key: key);
 
+  // Agora a lista pode ser 'const' porque a classe Exercise também tem um construtor 'const'
+  final List<Exercise> chestAndTricepsWorkout = const [
+    Exercise(name: 'Supino Reto com Barra', series: '4 séries'),
+    Exercise(name: 'Supino Inclinado com Halteres', series: '4 séries'),
+    Exercise(name: 'Crucifixo na Máquina (Voador)', series: '3 séries'),
+    Exercise(name: 'Mergulho nas Paralelas (Dips)', series: '3 séries'),
+    Exercise(name: 'Tríceps na Polia Alta com Corda', series: '4 séries'),
+    Exercise(name: 'Tríceps Francês com Halter', series: '3 séries'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Página de Treino',
-        style: TextStyle(fontSize: 24),
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.all(8.0),
+      itemCount: chestAndTricepsWorkout.length,
+      itemBuilder: (BuildContext context, int index) {
+        final exercise = chestAndTricepsWorkout[index];
+        return Card(
+          elevation: 3,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+            leading: CircleAvatar(
+              backgroundColor: Colors.amber[100],
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            title: Text(
+              exercise.name,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            subtitle: Text(exercise.series),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              // Ação futura: Navegar para uma tela de detalhes do exercício
+              print('Exercício selecionado: ${exercise.name}');
+            },
+          ),
+        );
+      },
     );
   }
 }
+
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);
