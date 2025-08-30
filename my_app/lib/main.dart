@@ -14,6 +14,15 @@ class BeeFitApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.amber,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        // --- CORREÇÃO APLICADA AQUI ---
+        // Trocado CardTheme por CardThemeData
+        cardTheme: CardThemeData(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        ),
       ),
       home: const HomeScreen(),
       debugShowCheckedModeBanner: false,
@@ -45,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pop(context); // Fecha o menu lateral após a seleção
+    Navigator.pop(context);
   }
 
   @override
@@ -59,8 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             const UserAccountsDrawerHeader(
-              accountName: Text("Nome do Usuário"),
-              accountEmail: Text("usuario@email.com"),
+              accountName: Text("Bruno Silva"),
+              accountEmail: Text("bruno.silva@email.com"),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Text(
@@ -94,20 +103,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Modelo de dados para um exercício
 class Exercise {
   final String name;
   final String series;
 
-  // --- CORREÇÃO APLICADA AQUI ---
-  // Adicionado 'const' ao construtor
   const Exercise({required this.name, required this.series});
 }
 
 class TrainingPage extends StatelessWidget {
   const TrainingPage({Key? key}) : super(key: key);
 
-  // Agora a lista pode ser 'const' porque a classe Exercise também tem um construtor 'const'
   final List<Exercise> chestAndTricepsWorkout = const [
     Exercise(name: 'Supino Reto com Barra', series: '4 séries'),
     Exercise(name: 'Supino Inclinado com Halteres', series: '4 séries'),
@@ -119,14 +124,13 @@ class TrainingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Usando o theme definido no MaterialApp para os cards
     return ListView.builder(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
       itemCount: chestAndTricepsWorkout.length,
       itemBuilder: (BuildContext context, int index) {
         final exercise = chestAndTricepsWorkout[index];
         return Card(
-          elevation: 3,
-          margin: const EdgeInsets.symmetric(vertical: 8.0),
           child: ListTile(
             contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
             leading: CircleAvatar(
@@ -146,7 +150,6 @@ class TrainingPage extends StatelessWidget {
             subtitle: Text(exercise.series),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // Ação futura: Navegar para uma tela de detalhes do exercício
               print('Exercício selecionado: ${exercise.name}');
             },
           ),
@@ -162,11 +165,93 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Página de Perfil',
-        style: TextStyle(fontSize: 24),
-      ),
+    return ListView(
+      children: <Widget>[
+        const SizedBox(height: 20),
+        const CircleAvatar(
+          radius: 60,
+          backgroundColor: Colors.amber,
+          child: CircleAvatar(
+            radius: 55,
+            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Center(
+          child: Text(
+            'Bruno Silva',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Center(
+          child: Text(
+            'bruno.silva@email.com',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+          ),
+        ),
+        const SizedBox(height: 20),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.height, color: Colors.amber),
+                title: const Text('Altura'),
+                trailing: const Text('182 cm', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              ListTile(
+                leading: const Icon(Icons.monitor_weight, color: Colors.amber),
+                title: const Text('Peso'),
+                trailing: const Text('85 kg', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              ListTile(
+                leading: const Icon(Icons.cake, color: Colors.amber),
+                title: const Text('Idade'),
+                trailing: const Text('28 anos', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.flag, color: Colors.amber),
+            title: const Text('Objetivo Principal'),
+            trailing: const Text('Hipertrofia', style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ),
+        const SizedBox(height: 30),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.edit),
+            label: const Text('Editar Perfil'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {},
+          ),
+        ),
+        const SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: TextButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text('Sair'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {},
+          ),
+        ),
+      ],
     );
   }
 }
