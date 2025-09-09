@@ -33,7 +33,7 @@ jobs:
       - name: Configurar o Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: 'my_app/pubspec.yaml'
+          flutter-version: '3.22.2'
           cache: true
 
       # 4. Instalar dependências
