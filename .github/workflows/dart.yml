@@ -33,24 +33,28 @@ jobs:
       - name: Configurar o Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: 'pubspec.yaml'
+          flutter-version-file: 'my_app/pubspec.yaml'
           cache: true
 
       # 4. Instalar dependências
       - name: Instalar dependências
         run: flutter pub get
-
+        working-directory: ./my_app
+          
       # 5. Análise Estática do Código
       - name: Analisar o código
         run: flutter analyze
+        working-directory: ./my_app
 
       # 6. Rodar os Testes
       - name: Rodar os testes
         run: flutter test
+        working-directory: ./my_app
 
       # 7. Fazer o Build do APK
       - name: Fazer o build do APK de depuração
         run: flutter build apk --debug
+        working-directory: ./my_app
 
       # Para fazer o build de um App Bundle (formato para a Play Store):
       # - name: Fazer o build de um App Bundle
