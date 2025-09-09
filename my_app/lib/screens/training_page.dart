@@ -1,82 +1,44 @@
 import 'package:flutter/material.dart';
 import '../models/exercise_model.dart';
+import '../repositories/workout_repository.dart';
 import 'edit_exercise_page.dart';
 
-// --- NOVAS IMPORTAÇÕES ---
-import 'dart:io';                 // Para lidar com arquivos (File)
-import 'dart:convert';            // Para codificar/decodificar JSON
-import 'package:path_provider/path_provider.dart'; // Para encontrar o caminho de salvamento
-
 class TrainingPage extends StatefulWidget {
-  const TrainingPage({Key? key}) : super(key: key);
+  final WorkoutRepository repository;
+
+  const TrainingPage({
+    Key? key,
+    this.repository = const FileWorkoutRepository(),
+  }) : super(key: key);
 
   @override
-  State<TrainingPage> createState() => _TrainingPageState();
+  State<TrainingPage> createState() => TrainingPageState();
 }
 
-class _TrainingPageState extends State<TrainingPage> {
-  List<Exercise> chestAndTricepsWorkout = []; // Inicia a lista vazia
-  bool _isLoading = true; // NOVO: Flag para controlar o estado de carregamento
+class TrainingPageState extends State<TrainingPage> {
+  List<Exercise> chestAndTricepsWorkout = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadExercises(); // NOVO: Carrega os exercícios quando a página inicia
+    loadExercises();
   }
 
-  // --- NOVAS FUNÇÕES DE SALVAR E CARREGAR ---
-
-  // Encontra o caminho e o arquivo onde os dados serão salvos
-  Future<File> _getFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = directory.path;
-    return File('$path/workout.json');
-  }
-
-  // Salva a lista atual de exercícios no arquivo JSON
-  Future<void> _saveExercises() async {
-    final file = await _getFile();
-    // Converte a lista de exercícios para uma lista de JSON
-    final List<Map<String, dynamic>> exercisesJson =
-        chestAndTricepsWorkout.map((exercise) => exercise.toJson()).toList();
-    // Escreve a string JSON no arquivo
-    await file.writeAsString(jsonEncode(exercisesJson));
-  }
-
-  // Carrega os exercícios do arquivo JSON
-  Future<void> _loadExercises() async {
-    try {
-      final file = await _getFile();
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        final List<dynamic> exercisesJson = jsonDecode(contents);
-        setState(() {
-          chestAndTricepsWorkout =
-              exercisesJson.map((json) => Exercise.fromJson(json)).toList();
-        });
-      } else {
-         // Se o arquivo não existe, carrega a lista padrão
-        setState(() {
-          chestAndTricepsWorkout = [
-            Exercise(name: 'Supino Reto com Barra', series: '4 séries'),
-            Exercise(name: 'Supino Inclinado com Halteres', series: '4 séries'),
-            Exercise(name: 'Crucifixo na Máquina (Voador)', series: '3 séries'),
-            Exercise(name: 'Mergulho nas Paralelas (Dips)', series: '3 séries'),
-            Exercise(name: 'Tríceps na Polia Alta com Corda', series: '4 séries'),
-            Exercise(name: 'Tríceps Francês com Halter', series: '3 séries'),
-          ];
-        });
-      }
-    } catch (e) {
-      print("Erro ao carregar exercícios: $e");
-    } finally {
+  Future<void> loadExercises() async {
+    if (mounted) setState(() => _isLoading = true);
+    final loadedExercises = await widget.repository.loadExercises();
+    if (mounted) {
       setState(() {
-        _isLoading = false; // Finaliza o carregamento
+        chestAndTricepsWorkout = loadedExercises;
+        _isLoading = false;
       });
     }
   }
-  
-  // --- FIM DAS NOVAS FUNÇÕES ---
+
+  Future<void> saveChanges() async {
+    await widget.repository.saveExercises(chestAndTricepsWorkout);
+  }
 
   void _addExercise() {
     setState(() {
@@ -84,7 +46,7 @@ class _TrainingPageState extends State<TrainingPage> {
         Exercise(name: 'Novo Exercício Adicionado', series: '3 séries de 12'),
       );
     });
-    _saveExercises(); // NOVO: Salva após adicionar
+    saveChanges();
   }
 
   void _navigateToEditPage(BuildContext context, int index) async {
@@ -97,19 +59,21 @@ class _TrainingPageState extends State<TrainingPage> {
       ),
     );
 
-    bool shouldSave = false; // Flag para saber se precisa salvar
+    bool shouldSave = false;
 
     if (result == 'DELETE') {
       setState(() {
         chestAndTricepsWorkout.removeAt(index);
       });
       shouldSave = true;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Exercício apagado com sucesso.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Exercício apagado com sucesso.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } else if (result != null && result is Exercise) {
       setState(() {
         chestAndTricepsWorkout[index] = result;
@@ -118,7 +82,7 @@ class _TrainingPageState extends State<TrainingPage> {
     }
 
     if (shouldSave) {
-      _saveExercises(); // NOVO: Salva após editar ou apagar
+      saveChanges();
     }
   }
 
@@ -129,9 +93,8 @@ class _TrainingPageState extends State<TrainingPage> {
         title: const Text('Treino de Peito e Tríceps'),
         backgroundColor: Colors.blueAccent,
       ),
-      // NOVO: Mostra um indicador de carregamento enquanto os dados não chegam
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: Text('Carregando exercícios...'))
           : Column(
               children: [
                 Expanded(
@@ -157,7 +120,7 @@ class _TrainingPageState extends State<TrainingPage> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.w500)),
                           subtitle: Text(exercise.series),
-                          trailing: const Icon(Icons.edit), // Ícone alterado
+                          trailing: const Icon(Icons.edit),
                           onTap: () => _navigateToEditPage(context, index),
                         ),
                       );
