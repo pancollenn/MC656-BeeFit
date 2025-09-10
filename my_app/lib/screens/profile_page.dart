@@ -38,7 +38,12 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: Colors.amber,
           child: CircleAvatar(
             radius: 55,
-            backgroundImage: NetworkImage(widget.user.profileImageUrl),
+            backgroundImage: widget.user.profileImageUrl.isEmpty
+                ? null
+                : NetworkImage(widget.user.profileImageUrl),
+            child: widget.user.profileImageUrl.isEmpty
+                ? Icon(Icons.person, size: 55)
+                : null,
           ),
         ),
         const SizedBox(height: 10),

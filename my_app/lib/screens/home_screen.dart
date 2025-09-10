@@ -5,7 +5,8 @@ import './profile_page.dart';
 import './training_page.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final UserService? userService;
+  const HomeScreen({Key? key, this.userService}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,11 +15,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   User? _user;
-  final UserService _userService = UserService();
+  late final UserService _userService;
 
   @override
   void initState() {
     super.initState();
+    _userService = widget.userService ?? UserService();
     _loadUser();
   }
 
