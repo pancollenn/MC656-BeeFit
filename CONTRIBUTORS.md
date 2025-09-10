@@ -3,4 +3,4 @@
     Nicholas Pucharelli Fontanini  (RA253769)
     Jociclelio Castro Macedo Junior (RA231722)
     Iran Seixas Lopes Neto  (RA244827)
-    Nome do Fulano  (RAXXXXX)
+    Rafael Attilio Agricola (RA249245)
