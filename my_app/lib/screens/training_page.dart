@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/exercise_model.dart';
 import '../repositories/workout_repository.dart';
 import 'edit_exercise_page.dart';
+import '../widgets/stopwatch_dialog.dart';
 
 class TrainingPage extends StatefulWidget {
   final WorkoutRepository repository;
@@ -86,6 +87,15 @@ class TrainingPageState extends State<TrainingPage> {
     }
   }
 
+  void _showStopwatchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const StopwatchDialog();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,6 +155,11 @@ class TrainingPageState extends State<TrainingPage> {
                 ),
               ],
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showStopwatchDialog,
+        tooltip: 'Cronômetro',
+        child: const Icon(Icons.timer),
+      ),
     );
   }
 }
