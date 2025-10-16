@@ -60,11 +60,10 @@ class _StopwatchDialogState extends State<StopwatchDialog> {
 
   void _reset() {
     _stopwatch.reset();
-    if (!_isRunning) { // Só atualiza a UI se não estiver rodando
-      setState(() {
-        _result = '00:00:00';
-      });
-    }
+    setState(() {
+      _result = '00:00:00';
+    });
+    
   }
 
   @override
