@@ -1,3 +1,5 @@
+// lib/screens/edit_profile_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 
@@ -19,6 +21,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+    // Preenche os controladores com os dados do usuário recebido
     _nameController = TextEditingController(text: widget.user.name);
     _heightController = TextEditingController(text: widget.user.height.toString());
     _weightController = TextEditingController(text: widget.user.weight.toString());
@@ -28,6 +31,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   void dispose() {
+    // Sempre limpe os controladores
     _nameController.dispose();
     _heightController.dispose();
     _weightController.dispose();
@@ -37,15 +41,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _saveProfile() {
+    // Cria um novo objeto User com os dados atualizados
     final updatedUser = User(
       name: _nameController.text,
-      email: widget.user.email,
+      email: widget.user.email, // Preserva o email original (não editável aqui)
       height: int.tryParse(_heightController.text) ?? widget.user.height,
       weight: int.tryParse(_weightController.text) ?? widget.user.weight,
       age: int.tryParse(_ageController.text) ?? widget.user.age,
       objective: _objectiveController.text,
-      profileImageUrl: widget.user.profileImageUrl,
+      profileImageUrl: widget.user.profileImageUrl, // Preserva a imagem original
     );
+    
+    // Retorna o objeto User atualizado para a tela anterior (ProfilePage)
     Navigator.pop(context, updatedUser);
   }
 
@@ -54,22 +61,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Perfil'),
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _saveProfile)],
+        actions: [
+          // Botão de salvar na AppBar que chama a função _saveProfile
+          IconButton(icon: const Icon(Icons.save), onPressed: _saveProfile)
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
-          TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Nome')),
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Nome'),
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _heightController, decoration: const InputDecoration(labelText: 'Altura (cm)'), keyboardType: TextInputType.number),
+          TextField(
+            controller: _heightController,
+            decoration: const InputDecoration(labelText: 'Altura (cm)'),
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _weightController, decoration: const InputDecoration(labelText: 'Peso (kg)'), keyboardType: TextInputType.number),
+          TextField(
+            controller: _weightController,
+            decoration: const InputDecoration(labelText: 'Peso (kg)'),
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _ageController, decoration: const InputDecoration(labelText: 'Idade'), keyboardType: TextInputType.number),
+          TextField(
+            controller: _ageController,
+            decoration: const InputDecoration(labelText: 'Idade'),
+            keyboardType: TextInputType.number,
+          ),
           const SizedBox(height: 16),
-          TextField(controller: _objectiveController, decoration: const InputDecoration(labelText: 'Objetivo')),
+          TextField(
+            controller: _objectiveController,
+            decoration: const InputDecoration(labelText: 'Objetivo'),
+          ),
           const SizedBox(height: 32),
-          ElevatedButton(child: const Text('Salvar Alterações'), onPressed: _saveProfile),
+          // Botão de salvar principal no corpo da tela
+          ElevatedButton(
+            child: const Text('Salvar Alterações'),
+            onPressed: _saveProfile,
+          ),
         ],
       ),
     );

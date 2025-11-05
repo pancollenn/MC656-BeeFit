@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  provider: ^6.1.2
     
   shared_preferences: ^2.2.2 # Você pode usar a versão mais recente
 
