@@ -1,53 +1,84 @@
-// lib/providers/workout_provider.dart
 import 'package:flutter/foundation.dart';
 import '../models/exercise_model.dart';
+import '../models/workout_plan.dart'; // Importe o novo modelo
 import '../repositories/workout_repository.dart';
 
 class WorkoutProvider with ChangeNotifier {
   final WorkoutRepository _repository;
 
-  List<Exercise> _exercises = [];
+  List<WorkoutPlan> _plans = [];
   bool _isLoading = true;
 
-  List<Exercise> get exercises => _exercises;
+  List<WorkoutPlan> get plans => _plans;
   bool get isLoading => _isLoading;
 
   WorkoutProvider({WorkoutRepository? repository})
       : _repository = repository ?? const FileWorkoutRepository();
 
-  Future<void> loadExercises() async {
+  Future<void> loadPlans() async {
     _isLoading = true;
     notifyListeners();
-    _exercises = await _repository.loadExercises();
+    _plans = await _repository.loadWorkoutPlans();
     _isLoading = false;
     notifyListeners();
   }
 
-  // Salva e notifica
-  Future<void> _saveAndNotify() async {
-    await _repository.saveExercises(_exercises);
+  Future<void> _savePlansAndNotify() async {
+    await _repository.saveWorkoutPlans(_plans);
     notifyListeners();
   }
 
-  void addExercise() {
-    _exercises.add(
-      Exercise(name: 'Novo Exercício Adicionado', series: '3 séries de 12'),
+  // --- Métodos para gerenciar PLANOS ---
+
+  void addPlan(String name) {
+    _plans.add(
+      WorkoutPlan(name: name, exercises: []),
     );
-    // Salva em "segundo plano", mas notifica a UI imediatamente
-    _saveAndNotify();
+    _savePlansAndNotify();
   }
 
-  void updateExercise(int index, Exercise exercise) {
-    if (index >= 0 && index < _exercises.length) {
-      _exercises[index] = exercise;
-      _saveAndNotify();
+  void deletePlan(int planIndex) {
+    if (planIndex >= 0 && planIndex < _plans.length) {
+      _plans.removeAt(planIndex);
+      _savePlansAndNotify();
     }
   }
 
-  void deleteExercise(int index) {
-    if (index >= 0 && index < _exercises.length) {
-      _exercises.removeAt(index);
-      _saveAndNotify();
+  void updatePlanName(int planIndex, String newName) {
+    if (planIndex >= 0 && planIndex < _plans.length) {
+      _plans[planIndex].name = newName;
+      _savePlansAndNotify();
+    }
+  }
+
+  // --- Métodos para gerenciar EXERCÍCIOS DENTRO DE UM PLANO ---
+
+  void addExerciseToPlan(int planIndex) {
+    if (planIndex >= 0 && planIndex < _plans.length) {
+      _plans[planIndex].exercises.add(
+            Exercise(name: 'Novo Exercício', series: '3 séries de 10'),
+          );
+      _savePlansAndNotify();
+    }
+  }
+
+  void updateExerciseInPlan(int planIndex, int exerciseIndex, Exercise exercise) {
+    if (planIndex >= 0 && planIndex < _plans.length) {
+      final plan = _plans[planIndex];
+      if (exerciseIndex >= 0 && exerciseIndex < plan.exercises.length) {
+        plan.exercises[exerciseIndex] = exercise;
+        _savePlansAndNotify();
+      }
+    }
+  }
+
+  void deleteExerciseFromPlan(int planIndex, int exerciseIndex) {
+    if (planIndex >= 0 && planIndex < _plans.length) {
+      final plan = _plans[planIndex];
+      if (exerciseIndex >= 0 && exerciseIndex < plan.exercises.length) {
+        plan.exercises.removeAt(exerciseIndex);
+        _savePlansAndNotify();
+      }
     }
   }
 }
