@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import '../models/user_model.dart';
-import '../services/user_service.dart';
+import 'package:provider/provider.dart'; // Importe
+import '../providers/user_provider.dart'; // Importe
 import './profile_page.dart';
 import './training_page.dart';
 
 class HomeScreen extends StatefulWidget {
-  final UserService? userService;
-  const HomeScreen({Key? key, this.userService}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -14,48 +13,48 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  User? _user;
-  late final UserService _userService;
 
   @override
   void initState() {
     super.initState();
-    _userService = widget.userService ?? UserService();
-    _loadUser();
-  }
-
-  Future<void> _loadUser() async {
-    final loadedUser = await _userService.loadUser();
-    setState(() {
-      _user = loadedUser;
-    });
-  }
-
-  Future<void> _updateUser(User updatedUser) async {
-    await _userService.saveUser(updatedUser);
-    setState(() {
-      _user = updatedUser;
-    });
+    // Carrega o usuário assim que o app é iniciado
+    // context.read<...>() pega o provider sem "ouvir" mudanças
+    // Usamos 'listen: false' fora do build para evitar reconstruções
+    Provider.of<UserProvider>(context, listen: false).loadUser();
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    Navigator.pop(context);
+    Navigator.pop(context); // Fecha o Drawer
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_user == null) {
+    // context.watch<...>() "ouve" as mudanças no provider
+    // Quando 'notifyListeners()' é chamado, este 'build' será refeito.
+    final userProvider = context.watch<UserProvider>();
+
+    if (userProvider.isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
+    
+    // Se não está carregando e o usuário é nulo (erro), mostre um erro
+    if (userProvider.user == null) {
+      return const Scaffold(
+        body: Center(child: Text('Erro ao carregar usuário.')),
+      );
+    }
 
+    final user = userProvider.user!;
+
+    // As páginas não precisam mais receber o usuário por parâmetro!
     final List<Widget> pages = [
       const TrainingPage(),
-      ProfilePage(user: _user!, onUserUpdated: _updateUser),
+      const ProfilePage(),
     ];
 
     final List<String> pageTitles = ['Treino do Dia: Peito e Tríceps', 'Perfil'];
@@ -67,8 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: Text(_user!.name),
-              accountEmail: Text(_user!.email),
+              accountName: Text(user.name),    // Pega do provider
+              accountEmail: Text(user.email), // Pega do provider
               currentAccountPicture: const CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Text("B", style: TextStyle(fontSize: 40.0, color: Colors.amber)),
