@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/exercise_model.dart';
+import '../models/workout_plan.dart'; // Importe o WorkoutPlan
 import '../providers/workout_provider.dart';
 import 'edit_exercise_page.dart';
+import 'active_workout_page.dart'; // Importe a ActiveWorkoutPage
 
 class WorkoutPlanDetailsPage extends StatefulWidget {
   final int planIndex;
@@ -16,10 +18,12 @@ class WorkoutPlanDetailsPage extends StatefulWidget {
 
 class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
 
+  // Ação de Adicionar Exercício
   void _addExercise() {
     context.read<WorkoutProvider>().addExerciseToPlan(widget.planIndex);
   }
 
+  // Ação de Editar Exercício
   void _navigateToEditPage(BuildContext context, int exerciseIndex) async {
     final workoutProvider = context.read<WorkoutProvider>();
     final exercise = workoutProvider.plans[widget.planIndex].exercises[exerciseIndex];
@@ -32,7 +36,6 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
     );
 
     if (!mounted) return;
-
     bool shouldShowSnackbar = false;
 
     if (result == 'DELETE') {
@@ -42,7 +45,7 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
       workoutProvider.updateExerciseInPlan(widget.planIndex, exerciseIndex, result);
     }
 
-    if (shouldShowSnackbar) {
+    if (shouldShowSnackbar && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Exercício apagado com sucesso.'),
@@ -50,6 +53,17 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
         ),
       );
     }
+  }
+
+  // Ação de Iniciar Treino
+  void _startWorkout(WorkoutPlan plan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        // Navega para a tela de treino ativo
+        builder: (context) => ActiveWorkoutPage(plan: plan),
+      ),
+    );
   }
 
   @override
@@ -63,56 +77,55 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
       appBar: AppBar(
         title: Text(plan.name), // Título da AppBar é o nome do plano
         backgroundColor: Colors.blueAccent,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-              itemCount: plan.exercises.length, // Lista os exercícios DESTE plano
-              itemBuilder: (BuildContext context, int index) {
-                final exercise = plan.exercises[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 4.0),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 15.0),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.amber[100],
-                      child: Text('${index + 1}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87)),
-                    ),
-                    title: Text(exercise.name,
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                    subtitle: Text(exercise.series),
-                    trailing: const Icon(Icons.edit),
-                    onTap: () => _navigateToEditPage(context, index),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              onPressed: _addExercise,
-              icon: const Icon(Icons.add),
-              label: const Text('Adicionar Exercício'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(50),
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-            ),
+        actions: [
+          // 2. MUDANÇA: Botão "Adicionar Exercício" agora é um ícone aqui
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: 'Adicionar Exercício',
+            onPressed: _addExercise,
           ),
         ],
       ),
+      // 3. MUDANÇA: O body agora é SÓ a lista.
+      // A Column foi removida.
+      body: ListView.builder(
+        // Adiciona um padding no final para o FAB não cobrir o último item
+        padding: const EdgeInsets.only(top: 8.0, bottom: 100.0),
+        itemCount: plan.exercises.length, // Lista os exercícios DESTE plano
+        itemBuilder: (BuildContext context, int index) {
+          final exercise = plan.exercises[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(
+                horizontal: 10.0, vertical: 4.0),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10.0, horizontal: 15.0),
+              leading: CircleAvatar(
+                backgroundColor: Colors.amber[100],
+                child: Text('${index + 1}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87)),
+              ),
+              title: Text(exercise.name,
+                  style: const TextStyle(fontWeight: FontWeight.w500)),
+              subtitle: Text(exercise.series),
+              trailing: const Icon(Icons.edit),
+              onTap: () => _navigateToEditPage(context, index),
+            ),
+          );
+        },
+      ),
+
+      // 1. MUDANÇA: O botão principal agora é um FloatingActionButton
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _startWorkout(plan),
+        label: const Text('INICIAR TREINO'),
+        icon: const Icon(Icons.play_arrow),
+        backgroundColor: Colors.amber,
+        foregroundColor: Colors.black,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

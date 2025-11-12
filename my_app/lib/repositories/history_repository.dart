@@ -24,7 +24,7 @@ class FileHistoryRepository implements HistoryRepository {
     return File('$path/history.json');
   }
 
-  @Override
+  @override
   Future<List<WorkoutSession>> loadHistory() async {
     try {
       final file = await _getFile();
@@ -53,7 +53,7 @@ class FileHistoryRepository implements HistoryRepository {
     }
   }
 
-  @Override
+  @override
   Future<void> saveHistory(List<WorkoutSession> sessions) async {
     try {
       final file = await _getFile();
