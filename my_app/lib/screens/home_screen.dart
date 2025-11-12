@@ -1,8 +1,10 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Importe
-import '../providers/user_provider.dart'; // Importe
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
 import './profile_page.dart';
 import './training_page.dart';
+import './history_page.dart'; // 1. IMPORTA A NOVA TELA
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -12,14 +14,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // O 'Treino' (TrainingPage) agora é o índice 0
   int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     // Carrega o usuário assim que o app é iniciado
-    // context.read<...>() pega o provider sem "ouvir" mudanças
-    // Usamos 'listen: false' fora do build para evitar reconstruções
     Provider.of<UserProvider>(context, listen: false).loadUser();
   }
 
@@ -33,7 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // context.watch<...>() "ouve" as mudanças no provider
-    // Quando 'notifyListeners()' é chamado, este 'build' será refeito.
     final userProvider = context.watch<UserProvider>();
 
     if (userProvider.isLoading) {
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     
-    // Se não está carregando e o usuário é nulo (erro), mostre um erro
+    // Se não está carregando e o usuário é nulo (erro)
     if (userProvider.user == null) {
       return const Scaffold(
         body: Center(child: Text('Erro ao carregar usuário.')),
@@ -51,13 +51,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final user = userProvider.user!;
 
-    // As páginas não precisam mais receber o usuário por parâmetro!
+    // 2. ADICIONA A TELA E O TÍTULO ÀS LISTAS
+    // A ordem aqui deve bater com a ordem do Drawer
     final List<Widget> pages = [
       const TrainingPage(),
+      const HistoryPage(), // Adicionada
       const ProfilePage(),
     ];
 
-    final List<String> pageTitles = ['Treino do Dia: Peito e Tríceps', 'Perfil'];
+    final List<String> pageTitles = [
+      'Planos de Treino', // Título atualizado
+      'Histórico de Treinos', // Adicionado
+      'Perfil',
+    ];
 
     return Scaffold(
       appBar: AppBar(title: Text(pageTitles[_selectedIndex])),
@@ -66,23 +72,38 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: Text(user.name),    // Pega do provider
-              accountEmail: Text(user.email), // Pega do provider
+              accountName: Text(user.name),
+              accountEmail: Text(user.email),
               currentAccountPicture: const CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Text("B", style: TextStyle(fontSize: 40.0, color: Colors.amber)),
               ),
               decoration: const BoxDecoration(color: Colors.amber),
             ),
+            
+            // Item "Treino"
             ListTile(
               leading: const Icon(Icons.fitness_center),
               title: const Text('Treino'),
+              selected: _selectedIndex == 0, // Destaque visual
               onTap: () => _onItemTapped(0),
             ),
+            
+            // 3. ADICIONA O ITEM NO MENU DRAWER
+            // Item "Histórico"
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Histórico'),
+              selected: _selectedIndex == 1, // Destaque visual
+              onTap: () => _onItemTapped(1),
+            ),
+            
+            // Item "Perfil"
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Perfil'),
-              onTap: () => _onItemTapped(1),
+              selected: _selectedIndex == 2, // Destaque visual
+              onTap: () => _onItemTapped(2),
             ),
           ],
         ),
