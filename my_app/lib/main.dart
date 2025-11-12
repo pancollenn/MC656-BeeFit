@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Importe o Provider
+import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
-import 'providers/user_provider.dart';    // Importe seu UserProvider
-import 'providers/workout_provider.dart'; // Importe seu WorkoutProvider
+import 'providers/user_provider.dart';
+import 'providers/workout_provider.dart';
+import 'providers/history_provider.dart'; // 1. IMPORTE O NOVO PROVIDER
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +15,6 @@ class BeeFitApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MultiProvider permite "prover" vários providers de uma vez
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -22,6 +22,9 @@ class BeeFitApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => WorkoutProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => HistoryProvider(),
         ),
       ],
       child: MaterialApp(
