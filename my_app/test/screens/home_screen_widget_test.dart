@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:provider/provider.dart'; // 1. Import do Provider
 import 'home_screen_widget_test.mocks.dart';
 
 import 'package:my_app/screens/home_screen.dart';
 import 'package:my_app/models/user_model.dart';
 import 'package:my_app/services/user_service.dart';
-// 2. Import do UserProvider (caminho confirmado)
-import 'package:my_app/providers/user_provider.dart'; 
 
 @GenerateMocks([UserService])
 
@@ -32,18 +29,6 @@ void main() {
       when(mockUserService.saveUser(any)).thenAnswer((_) async {});
     });
 
-    // 3. Função helper para construir o widget com o Provider
-    Widget createWidgetUnderTest() {
-      return ChangeNotifierProvider<UserProvider>(
-        // 4. Instancia o UserProvider real injetando o mockUserService
-        create: (context) => UserProvider(userService: mockUserService),
-        child: const MaterialApp(
-          // 5. O construtor da HomeScreen agora está correto (sem parâmetros)
-          home: HomeScreen(), 
-        ),
-      );
-    }
-
     testWidgets('Exibe indicador de carregamento enquanto carrega usuário', (WidgetTester tester) async {
       // Simula atraso no carregamento
       when(mockUserService.loadUser()).thenAnswer((_) async {
@@ -51,10 +36,7 @@ void main() {
         return mockUser;
       });
 
-      // 6. Usa a função helper para construir o widget
-      await tester.pumpWidget(createWidgetUnderTest());
-      
-      // O primeiro pump (sem 'andSettle') mostra o estado de carregamento
+      await tester.pumpWidget(MaterialApp(home: HomeScreen(userService: mockUserService)));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       // Aguarda o carregamento
@@ -63,32 +45,30 @@ void main() {
     });
 
     testWidgets('Exibe nome e email do usuário no Drawer após carregamento', (WidgetTester tester) async {
-      // 6. Usa a função helper
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle(); // Espera o carregamento
+      await tester.pumpWidget(MaterialApp(home: HomeScreen(userService: mockUserService)));
+      await tester.pumpAndSettle();
 
       // Abre o Drawer pelo ícone padrão
       await tester.tap(find.byTooltip('Open navigation menu'));
-      await tester.pumpAndSettle(); // Espera a animação do drawer
+      await tester.pumpAndSettle();
 
       expect(find.text('João Silva'), findsOneWidget);
       expect(find.text('joao@example.com'), findsOneWidget);
     });
 
     testWidgets('Navega para página de perfil ao clicar no item do Drawer', (WidgetTester tester) async {
-      // 6. Usa a função helper
-      await tester.pumpWidget(createWidgetUnderTest());
-      await tester.pumpAndSettle(); // Espera o carregamento
+      await tester.pumpWidget(MaterialApp(home: HomeScreen(userService: mockUserService)));
+      await tester.pumpAndSettle();
 
-      // Abre o Drawer
+      // Abre o Drawer pelo ícone padrão
       await tester.tap(find.byTooltip('Open navigation menu'));
       await tester.pumpAndSettle();
 
       // Toca no item "Perfil"
       await tester.tap(find.text('Perfil'));
-      await tester.pumpAndSettle(); // Espera a navegação
+      await tester.pumpAndSettle();
 
-      // Verifica se a tela mudou (ex: procurando um título 'Perfil')
+      // Verifica se o título mudou para "Perfil"
       expect(find.text('Perfil'), findsOneWidget);
     });
   });
