@@ -14,7 +14,18 @@ abstract class WorkoutRepository {
 }
 
 class FileWorkoutRepository implements WorkoutRepository {
-  const FileWorkoutRepository();
+  // Instância única (privada e estática)
+  // Implementa o padrão Singleton para evitar múltiplas instâncias que possam causar leituras e gravações simultâneas em workout.json.
+  static final FileWorkoutRepository _instance = FileWorkoutRepository._internal();
+
+  // Factory constructor: sempre retorna a mesma instância
+  factory FileWorkoutRepository() {
+    return _instance;
+  }
+
+  // Construtor privado
+  FileWorkoutRepository._internal();
+
 
   Future<File> _getFile() async {
     final directory = await getApplicationDocumentsDirectory();

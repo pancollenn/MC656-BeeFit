@@ -13,7 +13,7 @@ class WorkoutProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   WorkoutProvider({WorkoutRepository? repository})
-      : _repository = repository ?? const FileWorkoutRepository();
+      : _repository = repository ?? FileWorkoutRepository();
 
   Future<void> loadPlans() async {
     _isLoading = true;
