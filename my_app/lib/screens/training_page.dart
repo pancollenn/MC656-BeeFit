@@ -1,42 +1,95 @@
 import 'package:flutter/material.dart';
-// --- CORREÇÃO APLICADA AQUI ---
-// Adicionada a importação do modelo de exercício
-import '../models/exercise_model.dart';
+import 'package:provider/provider.dart';
+import '../providers/workout_provider.dart';
+import 'workout_plan_details_page.dart'; // Importe a nova tela de detalhes
 
-class TrainingPage extends StatelessWidget {
+class TrainingPage extends StatefulWidget {
   const TrainingPage({Key? key}) : super(key: key);
 
-  // Agora o arquivo sabe o que é um 'Exercise' e que ele tem um construtor const
-  final List<Exercise> chestAndTricepsWorkout = const [
-    Exercise(name: 'Supino Reto com Barra', series: '4 séries'),
-    Exercise(name: 'Supino Inclinado com Halteres', series: '4 séries'),
-    Exercise(name: 'Crucifixo na Máquina (Voador)', series: '3 séries'),
-    Exercise(name: 'Mergulho nas Paralelas (Dips)', series: '3 séries'),
-    Exercise(name: 'Tríceps na Polia Alta com Corda', series: '4 séries'),
-    Exercise(name: 'Tríceps Francês com Halter', series: '3 séries'),
-  ];
+  @override
+  State<TrainingPage> createState() => TrainingPageState();
+}
+
+class TrainingPageState extends State<TrainingPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Agora chama loadPlans() em vez de loadExercises()
+    Provider.of<WorkoutProvider>(context, listen: false).loadPlans();
+  }
+
+  // Navega para a tela de detalhes passando o índice do plano
+  void _navigateToPlanDetails(int planIndex) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => WorkoutPlanDetailsPage(planIndex: planIndex),
+      ),
+    );
+  }
+
+  // Mostra um diálogo para adicionar um novo plano
+  void _showAddPlanDialog() {
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Novo Plano de Treino'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Nome do Plano (ex: Treino C)'),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Adicionar'),
+              onPressed: () {
+                if (nameController.text.isNotEmpty) {
+                  context.read<WorkoutProvider>().addPlan(nameController.text);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      itemCount: chestAndTricepsWorkout.length,
-      itemBuilder: (BuildContext context, int index) {
-        final exercise = chestAndTricepsWorkout[index];
-        return Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-            leading: CircleAvatar(
-              backgroundColor: Colors.amber[100],
-              child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
+    final workoutProvider = context.watch<WorkoutProvider>();
+
+    return Scaffold(
+      // A AppBar foi movida para a tela de detalhes
+      body: workoutProvider.isLoading
+          ? const Center(child: Text('Carregando planos...'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: workoutProvider.plans.length,
+              itemBuilder: (context, index) {
+                final plan = workoutProvider.plans[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(plan.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('${plan.exercises.length} exercícios'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () => _navigateToPlanDetails(index),
+                  ),
+                );
+              },
             ),
-            title: Text(exercise.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-            subtitle: Text(exercise.series),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => print('Exercício selecionado: ${exercise.name}'),
-          ),
-        );
-      },
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddPlanDialog,
+        child: const Icon(Icons.add),
+        tooltip: 'Adicionar Plano',
+        backgroundColor: Colors.amber,
+      ),
     );
   }
 }

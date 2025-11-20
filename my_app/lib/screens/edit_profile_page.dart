@@ -1,3 +1,5 @@
+// lib/screens/edit_profile_page.dart
+
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 
@@ -19,6 +21,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void initState() {
     super.initState();
+    // Preenche os controladores com os dados do usuário recebido
     _nameController = TextEditingController(text: widget.user.name);
     _heightController = TextEditingController(text: widget.user.height.toString());
     _weightController = TextEditingController(text: widget.user.weight.toString());
@@ -28,6 +31,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   void dispose() {
+    // Sempre limpe os controladores
     _nameController.dispose();
     _heightController.dispose();
     _weightController.dispose();
@@ -37,15 +41,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   void _saveProfile() {
+    // Cria um novo objeto User com os dados atualizados
     final updatedUser = User(
       name: _nameController.text,
-      email: widget.user.email,
+      email: widget.user.email, // Preserva o email original (não editável aqui)
       height: int.tryParse(_heightController.text) ?? widget.user.height,
       weight: int.tryParse(_weightController.text) ?? widget.user.weight,
       age: int.tryParse(_ageController.text) ?? widget.user.age,
       objective: _objectiveController.text,
-      profileImageUrl: widget.user.profileImageUrl,
+      profileImageUrl: widget.user.profileImageUrl, // Preserva a imagem original
     );
+    
+    // Retorna o objeto User atualizado para a tela anterior (ProfilePage)
     Navigator.pop(context, updatedUser);
   }
 
@@ -100,6 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       appBar: AppBar(
         title: const Text('Editar Perfil'),
         actions: [
+          // Botão de salvar na AppBar que chama a função _saveProfile
           IconButton(icon: const Icon(Icons.save), onPressed: _saveProfile)
         ],
       ),

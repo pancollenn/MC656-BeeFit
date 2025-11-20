@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart'; // Importa a tela principal que agora gerencia o app
+import 'package:provider/provider.dart';
+import 'screens/home_screen.dart';
+import 'providers/user_provider.dart';
+import 'providers/workout_provider.dart';
+import 'providers/history_provider.dart'; // 1. IMPORTE O NOVO PROVIDER
 
 void main() {
-  // Garante que os bindings do Flutter sejam inicializados antes de qualquer outra coisa.
-  // É uma boa prática, especialmente quando se lida com operações assíncronas antes do runApp.
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const BeeFitApp());
 }
@@ -13,22 +15,34 @@ class BeeFitApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'BeeFit',
-      theme: ThemeData(
-        primarySwatch: Colors.amber,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        cardTheme: CardThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => WorkoutProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => HistoryProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'BeeFit',
+        theme: ThemeData(
+          primarySwatch: Colors.amber,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          cardTheme: CardThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            elevation: 4,
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          ),
+        ),
+        home: const HomeScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      // A "home" do aplicativo agora é o HomeScreen, que controla todo o resto.
-      home: const HomeScreen(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }
