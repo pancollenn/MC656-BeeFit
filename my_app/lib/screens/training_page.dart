@@ -14,8 +14,10 @@ class TrainingPageState extends State<TrainingPage> {
   @override
   void initState() {
     super.initState();
-    // Agora chama loadPlans() em vez de loadExercises()
-    Provider.of<WorkoutProvider>(context, listen: false).loadPlans();
+    // Chama loadPlans() após o primeiro frame para evitar erro de setState durante build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<WorkoutProvider>(context, listen: false).loadPlans();
+    });
   }
 
   // Navega para a tela de detalhes passando o índice do plano
