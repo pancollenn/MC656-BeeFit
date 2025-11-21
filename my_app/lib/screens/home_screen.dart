@@ -20,8 +20,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Carrega o usuário assim que o app é iniciado
-    Provider.of<UserProvider>(context, listen: false).loadUser();
+    // Carrega o usuário após o primeiro frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).loadUser();
+    });
   }
 
   void _onItemTapped(int index) {
