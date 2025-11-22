@@ -1,106 +1,126 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
-import 'package:my_app/screens/training_page.dart';
-import 'package:my_app/providers/workout_provider.dart';
+import 'package:my_app/models/user_model.dart';
 
 void main() {
-  Widget createTestWidget() {
-    return ChangeNotifierProvider(
-      create: (_) => WorkoutProvider(),
-      child: const MaterialApp(
-        home: TrainingPage(),
-      ),
-    );
-  }
+  group('Avaliação A5 - Testes de Unidade no User', () {
 
-  group('TrainingPage - Testes Básicos', () {
-    testWidgets('Deve exibir mensagem de carregamento inicialmente', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pump(); // Aguarda o postFrameCallback
+    print('\n--- INICIANDO SUÍTE DE TESTES (A5) ---');
 
-      expect(find.text('Carregando planos...'), findsOneWidget);
+    // ============================================================
+    // CRITÉRIO 1: ANÁLISE DE VALOR LIMITE (Boundary Value Analysis)
+    // Foco: Campo 'age' (Limites aceitos: 2 a 120)
+    // ============================================================
+    
+    group('Critério: Análise de Valor Limite (Idade)', () {
+      test('CT01 - Deve rejeitar idade 1 (Limite Inferior -1)', () {
+        print('\n[CT01] Executando: Testando idade 1...');
+        final user = _createUser(age: 1);
+        final result = user.isValid();
+        
+        print('  -> Resultado obtido: $result (Esperado: false)');
+        expect(result, isFalse);
+      });
+
+      test('CT02 - Deve aceitar idade 2 (Limite Inferior)', () {
+        print('\n[CT02] Executando: Testando idade 2...');
+        final user = _createUser(age: 2);
+        final result = user.isValid();
+        
+        print('  -> Resultado obtido: $result (Esperado: true)');
+        expect(result, isTrue);
+      });
+
+      test('CT03 - Deve aceitar idade 120 (Limite Superior)', () {
+        print('\n[CT03] Executando: Testando idade 120...');
+        final user = _createUser(age: 120);
+        final result = user.isValid();
+        
+        print('  -> Resultado obtido: $result (Esperado: true)');
+        expect(result, isTrue);
+      });
+
+      test('CT04 - Deve rejeitar idade 121 (Limite Superior +1)', () {
+        print('\n[CT04] Executando: Testando idade 121...');
+        final user = _createUser(age: 121);
+        final result = user.isValid();
+        
+        print('  -> Resultado obtido: $result (Esperado: false)');
+        expect(result, isFalse);
+      });
     });
 
-    testWidgets('Deve exibir botão de adicionar plano', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+    // ============================================================
+    // CRITÉRIO 2: PAIRWISE (Testes em Pares)
+    // Variáveis Variadas: 
+    //   - Idade  (Válida / Inválida)
+    //   - Peso   (Válido / Inválido)
+    //   - Nome   (Válido / Inválido)
+    // Objetivo: Cobrir interações entre pares sem testar todas as 8 combinações.
+    // ============================================================
 
-      expect(find.byType(FloatingActionButton), findsOneWidget);
-      expect(find.byIcon(Icons.add), findsOneWidget);
-    });
+    group('Critério: Pairwise Testing', () {
+      
+      // Caso 1: Tudo Válido
+      // Pares cobertos: (Idade V, Peso V), (Peso V, Nome V), (Idade V, Nome V)
+      test('CT05 - Pairwise 1: Idade(V), Peso(V), Nome(V) -> Deve ser VÁLIDO', () {
+        print('\n[CT05] Executando: Tudo Válido...');
+        final user = _createUser(age: 25, weight: 80, name: 'Bruno');
+        final result = user.isValid();
+        
+        print('  -> Resultado obtido: $result (Esperado: true)');
+        expect(result, isTrue);
+      });
 
-    testWidgets('Deve abrir diálogo ao clicar em adicionar plano', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+      // Caso 2: Idade Válida, Peso Inválido, Nome Inválido
+      // Pares cobertos: (Idade V, Peso I), (Peso I, Nome I), (Idade V, Nome I)
+      test('CT06 - Pairwise 2: Idade(V), Peso(I), Nome(I) -> Deve ser INVÁLIDO', () {
+        print('\n[CT06] Executando: Idade Ok, mas Peso 0 e Nome vazio...');
+        final user = _createUser(age: 25, weight: 0, name: '');
+        final result = user.isValid();
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+        print('  -> Resultado obtido: $result (Esperado: false)');
+        expect(result, isFalse);
+      });
 
-      expect(find.text('Novo Plano de Treino'), findsOneWidget);
-      expect(find.text('Nome do Plano (ex: Treino C)'), findsOneWidget);
-    });
+      // Caso 3: Idade Inválida, Peso Válido, Nome Inválido
+      // Pares cobertos: (Idade I, Peso V), (Peso V, Nome I), (Idade I, Nome I)
+      test('CT07 - Pairwise 3: Idade(I), Peso(V), Nome(I) -> Deve ser INVÁLIDO', () {
+        print('\n[CT07] Executando: Peso Ok, mas Idade 1 e Nome vazio...');
+        final user = _createUser(age: 1, weight: 80, name: '');
+        final result = user.isValid();
 
-    testWidgets('Não deve adicionar plano com nome vazio', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
+        print('  -> Resultado obtido: $result (Esperado: false)');
+        expect(result, isFalse);
+      });
 
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
+      // Caso 4: Idade Inválida, Peso Inválido, Nome Válido
+      // Pares cobertos: (Idade I, Peso I), (Peso I, Nome V), (Idade I, Nome V)
+      test('CT08 - Pairwise 4: Idade(I), Peso(I), Nome(V) -> Deve ser INVÁLIDO', () {
+        print('\n[CT08] Executando: Nome Ok, mas Idade 1 e Peso 0...');
+        final user = _createUser(age: 1, weight: 0, name: 'Bruno');
+        final result = user.isValid();
 
-      // Tenta adicionar sem preencher
-      await tester.tap(find.text('Adicionar'));
-      await tester.pumpAndSettle();
-
-      // O diálogo não deve fechar
-      expect(find.text('Novo Plano de Treino'), findsOneWidget);
-    });
-
-    testWidgets('Deve cancelar criação de plano', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Cancelar'));
-      await tester.pumpAndSettle();
-
-      // O diálogo deve fechar
-      expect(find.text('Novo Plano de Treino'), findsNothing);
+        print('  -> Resultado obtido: $result (Esperado: false)');
+        expect(result, isFalse);
+      });
     });
   });
+}
 
-  group('TrainingPage - Particionamento (Nome do Plano)', () {  
-    testWidgets('Não deve aceitar nome vazio (classe inválida)', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '');
-      await tester.tap(find.text('Adicionar'));
-      await tester.pumpAndSettle();
-
-      // O diálogo não deve fechar
-      expect(find.text('Novo Plano de Treino'), findsOneWidget);
-    });
-
-    testWidgets('Não deve aceitar apenas espaços (classe inválida)', (WidgetTester tester) async {
-      await tester.pumpWidget(createTestWidget());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(find.byType(TextField), '   ');
-      await tester.tap(find.text('Adicionar'));
-      await tester.pumpAndSettle();
-
-      // isNotEmpty retorna true para espaços, então o diálogo fecha
-      // mas idealmente deveria validar isso
-      expect(find.text('Novo Plano de Treino'), findsNothing);
-    });
-  });
+// Helper para facilitar a criação de usuários nos testes
+User _createUser({
+  int age = 25, 
+  int weight = 80, 
+  String name = 'User Teste',
+  int height = 180 // Valor padrão válido
+}) {
+  return User(
+    name: name,
+    email: 'teste@email.com',
+    height: height,
+    weight: weight,
+    age: age,
+    objective: 'Hipertrofia',
+    profileImageUrl: '',
+  );
 }
