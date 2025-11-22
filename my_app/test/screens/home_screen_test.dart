@@ -13,7 +13,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => WorkoutProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
-      ],
+      ],  
       child: const MaterialApp(
         home: HomeScreen(),
       ),
