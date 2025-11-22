@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; // Precisaremos para formatar datas
-
+import 'session_details_page.dart';
 import '../providers/history_provider.dart';
 import '../models/workout_session.dart';
 
@@ -79,8 +79,12 @@ class _HistoryPageState extends State<HistoryPage> {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              // TODO: No futuro, podemos navegar para
-              // uma tela de detalhes da sessão
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SessionDetailsPage(session: session),
+                ),
+              );
             },
           ),
         );
