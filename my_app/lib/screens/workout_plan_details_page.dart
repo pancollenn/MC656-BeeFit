@@ -22,8 +22,33 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
   void _addExercise() {
     context.read<WorkoutProvider>().addExerciseToPlan(widget.planIndex);
   }
+  
+  // Novo método extraído para lidar com a lógica de dados
+  void _handleExerciseReturn(dynamic result, int exerciseIndex) {
+    if (!mounted) return;
 
-  // Ação de Editar Exercício
+    final workoutProvider = context.read<WorkoutProvider>();
+    bool shouldShowSnackbar = false;
+    String message = '';
+
+    if (result == 'DELETE') {
+      workoutProvider.deleteExerciseFromPlan(widget.planIndex, exerciseIndex);
+      shouldShowSnackbar = true;
+      message = 'Exercício removido!';
+    } else if (result != null && result is Exercise) {
+      workoutProvider.updateExerciseInPlan(widget.planIndex, exerciseIndex, result);
+      shouldShowSnackbar = true;
+      message = 'Exercício atualizado!';
+    }
+
+    if (shouldShowSnackbar) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
+  // Método original agora focado apenas na navegação
   void _navigateToEditPage(BuildContext context, int exerciseIndex) async {
     final workoutProvider = context.read<WorkoutProvider>();
     final exercise = workoutProvider.plans[widget.planIndex].exercises[exerciseIndex];
@@ -35,24 +60,8 @@ class _WorkoutPlanDetailsPageState extends State<WorkoutPlanDetailsPage> {
       ),
     );
 
-    if (!mounted) return;
-    bool shouldShowSnackbar = false;
-
-    if (result == 'DELETE') {
-      workoutProvider.deleteExerciseFromPlan(widget.planIndex, exerciseIndex);
-      shouldShowSnackbar = true;
-    } else if (result != null && result is Exercise) {
-      workoutProvider.updateExerciseInPlan(widget.planIndex, exerciseIndex, result);
-    }
-
-    if (shouldShowSnackbar && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Exercício apagado com sucesso.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    // Delega o processamento do resultado
+    _handleExerciseReturn(result, exerciseIndex);
   }
 
   // Ação de Iniciar Treino
