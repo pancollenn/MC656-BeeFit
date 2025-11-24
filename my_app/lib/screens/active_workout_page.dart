@@ -7,6 +7,7 @@ import '../models/exercise_model.dart';
 import '../models/exercise_log.dart';
 import '../models/workout_session.dart';
 import '../providers/history_provider.dart';
+import '../widgets/stopwatch_dialog.dart';
 
 class ActiveWorkoutPage extends StatefulWidget {
   final WorkoutPlan plan;
@@ -33,6 +34,15 @@ class _ActiveWorkoutPageState extends State<ActiveWorkoutPage> {
   
   // Foco
   final FocusNode _repsFocus = FocusNode();
+
+  void _showStopwatchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const StopwatchDialog();
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -257,6 +267,12 @@ class _ActiveWorkoutPageState extends State<ActiveWorkoutPage> {
             ],
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+        onPressed: _showStopwatchDialog,
+        child: const Icon(Icons.timer),
+        tooltip: 'Cronômetro',
+        backgroundColor: Colors.amber,
+      ),
       ),
     );
   }
