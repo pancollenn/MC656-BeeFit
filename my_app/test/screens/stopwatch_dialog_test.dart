@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Adapte os imports para a estrutura do seu projeto
-import 'package:seu_app/models/exercise_model.dart';
-import 'package:seu_app/screens/training_page.dart';
-import 'package:seu_app/repositories/workout_repository.dart';
-import 'package:seu_app/widgets/stopwatch_dialog.dart';
+import 'package:my_app/models/exercise_model.dart';
+import 'package:my_app/screens/training_page.dart';
+import 'package:my_app/repositories/workout_repository.dart';
+import 'package:my_app/lib/widgets/stopwatch_dialog.dart';
 
 // 1. Implementação FALSA do repositório, como no seu exemplo.
 // Isso isola nosso teste de dependências externas (como arquivos).
