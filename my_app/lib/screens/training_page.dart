@@ -1,90 +1,64 @@
 import 'package:flutter/material.dart';
-import '../models/exercise_model.dart';
-import '../repositories/workout_repository.dart';
-import 'edit_exercise_page.dart';
-import '../widgets/stopwatch_dialog.dart';
+import 'package:provider/provider.dart';
+import '../providers/workout_provider.dart';
+import 'workout_plan_details_page.dart'; // Importe a nova tela de detalhes
 
 class TrainingPage extends StatefulWidget {
-  final WorkoutRepository repository;
-
-  const TrainingPage({
-    Key? key,
-    this.repository = const FileWorkoutRepository(),
-  }) : super(key: key);
+  const TrainingPage({Key? key}) : super(key: key);
 
   @override
   State<TrainingPage> createState() => TrainingPageState();
 }
 
 class TrainingPageState extends State<TrainingPage> {
-  List<Exercise> chestAndTricepsWorkout = [];
-  bool _isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    loadExercises();
+    // Agora chama loadPlans() em vez de loadExercises()
+    Provider.of<WorkoutProvider>(context, listen: false).loadPlans();
   }
 
-  Future<void> loadExercises() async {
-    if (mounted) setState(() => _isLoading = true);
-    final loadedExercises = await widget.repository.loadExercises();
-    if (mounted) {
-      setState(() {
-        chestAndTricepsWorkout = loadedExercises;
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> saveChanges() async {
-    await widget.repository.saveExercises(chestAndTricepsWorkout);
-  }
-
-  void _addExercise() {
-    setState(() {
-      chestAndTricepsWorkout.add(
-        Exercise(name: 'Novo Exercício Adicionado', series: '3 séries de 12'),
-      );
-    });
-    saveChanges();
-  }
-
-  void _navigateToEditPage(BuildContext context, int index) async {
-    final result = await Navigator.push(
+  // Navega para a tela de detalhes passando o índice do plano
+  void _navigateToPlanDetails(int planIndex) {
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditExercisePage(
-          exercise: chestAndTricepsWorkout[index],
-        ),
+        builder: (context) => WorkoutPlanDetailsPage(planIndex: planIndex),
       ),
     );
+  }
 
-    bool shouldSave = false;
-
-    if (result == 'DELETE') {
-      setState(() {
-        chestAndTricepsWorkout.removeAt(index);
-      });
-      shouldSave = true;
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Exercício apagado com sucesso.'),
-            backgroundColor: Colors.red,
+  // Mostra um diálogo para adicionar um novo plano
+  void _showAddPlanDialog() {
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Novo Plano de Treino'),
+          content: TextField(
+            controller: nameController,
+            decoration: const InputDecoration(labelText: 'Nome do Plano (ex: Treino C)'),
+            autofocus: true,
           ),
+          actions: [
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Adicionar'),
+              onPressed: () {
+                if (nameController.text.isNotEmpty) {
+                  context.read<WorkoutProvider>().addPlan(nameController.text);
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
         );
-      }
-    } else if (result != null && result is Exercise) {
-      setState(() {
-        chestAndTricepsWorkout[index] = result;
-      });
-      shouldSave = true;
-    }
-
-    if (shouldSave) {
-      saveChanges();
-    }
+      },
+    );
   }
 
   void _showStopwatchDialog() {
@@ -98,67 +72,32 @@ class TrainingPageState extends State<TrainingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final workoutProvider = context.watch<WorkoutProvider>();
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Treino de Peito e Tríceps'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: _isLoading
-          ? const Center(child: Text('Carregando exercícios...'))
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-                    itemCount: chestAndTricepsWorkout.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final exercise = chestAndTricepsWorkout[index];
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 4.0),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 15.0),
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.amber[100],
-                            child: Text('${index + 1}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87)),
-                          ),
-                          title: Text(exercise.name,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w500)),
-                          subtitle: Text(exercise.series),
-                          trailing: const Icon(Icons.edit),
-                          onTap: () => _navigateToEditPage(context, index),
-                        ),
-                      );
-                    },
+      // A AppBar foi movida para a tela de detalhes
+      body: workoutProvider.isLoading
+          ? const Center(child: Text('Carregando planos...'))
+          : ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: workoutProvider.plans.length,
+              itemBuilder: (context, index) {
+                final plan = workoutProvider.plans[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(plan.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('${plan.exercises.length} exercícios'),
+                    trailing: const Icon(Icons.arrow_forward_ios),
+                    onTap: () => _navigateToPlanDetails(index),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton.icon(
-                    onPressed: _addExercise,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Adicionar Exercício'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showStopwatchDialog,
-        tooltip: 'Cronômetro',
-        child: const Icon(Icons.timer),
+        onPressed: _showAddPlanDialog,
+        child: const Icon(Icons.add),
+        tooltip: 'Adicionar Plano',
+        backgroundColor: Colors.amber,
       ),
     );
   }
