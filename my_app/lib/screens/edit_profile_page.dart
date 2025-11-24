@@ -56,53 +56,63 @@ class _EditProfilePageState extends State<EditProfilePage> {
     Navigator.pop(context, updatedUser);
   }
 
+  // Extrai método para criar TextField e reduzir duplicação (Dispensables)
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label),
+      keyboardType: keyboardType,
+    );
+  }
+
+  // Extrai lista de campos para reduzir tamanho do build() (Bloaters)
+  List<Widget> _buildFormFields() {
+    return [
+      _buildTextField(controller: _nameController, label: 'Nome'),
+      const SizedBox(height: 16),
+      _buildTextField(
+        controller: _heightController,
+        label: 'Altura (cm)',
+        keyboardType: TextInputType.number,
+      ),
+      const SizedBox(height: 16),
+      _buildTextField(
+        controller: _weightController,
+        label: 'Peso (kg)',
+        keyboardType: TextInputType.number,
+      ),
+      const SizedBox(height: 16),
+      _buildTextField(
+        controller: _ageController,
+        label: 'Idade',
+        keyboardType: TextInputType.number,
+      ),
+      const SizedBox(height: 16),
+      _buildTextField(controller: _objectiveController, label: 'Objetivo'),
+      const SizedBox(height: 32),
+      ElevatedButton(
+        child: const Text('Salvar Alterações'),
+        onPressed: _saveProfile,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar Perfil'),
         actions: [
-          // Botão de salvar na AppBar que chama a função _saveProfile
           IconButton(icon: const Icon(Icons.save), onPressed: _saveProfile)
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
-        children: <Widget>[
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Nome'),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _heightController,
-            decoration: const InputDecoration(labelText: 'Altura (cm)'),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _weightController,
-            decoration: const InputDecoration(labelText: 'Peso (kg)'),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _ageController,
-            decoration: const InputDecoration(labelText: 'Idade'),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _objectiveController,
-            decoration: const InputDecoration(labelText: 'Objetivo'),
-          ),
-          const SizedBox(height: 32),
-          // Botão de salvar principal no corpo da tela
-          ElevatedButton(
-            child: const Text('Salvar Alterações'),
-            onPressed: _saveProfile,
-          ),
-        ],
+        children: _buildFormFields(), // Reduz complexidade do build()
       ),
     );
   }
