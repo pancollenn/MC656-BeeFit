@@ -107,6 +107,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       appBar: AppBar(
         title: const Text('Editar Perfil'),
         actions: [
+          // Botão de salvar na AppBar que chama a função _saveProfile
           IconButton(icon: const Icon(Icons.save), onPressed: _saveProfile)
         ],
       ),
