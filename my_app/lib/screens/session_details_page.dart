@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/workout_session.dart';
 import '../models/exercise_log.dart';
-
 class SessionDetailsPage extends StatelessWidget {
   final WorkoutSession session;
 

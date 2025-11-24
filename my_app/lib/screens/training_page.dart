@@ -63,15 +63,6 @@ class TrainingPageState extends State<TrainingPage> {
     );
   }
 
-  void _showStopwatchDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return const StopwatchDialog();
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final workoutProvider = context.watch<WorkoutProvider>();
