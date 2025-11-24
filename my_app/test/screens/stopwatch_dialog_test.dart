@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:my_app/models/exercise_model.dart';
 import 'package:my_app/screens/training_page.dart';
 import 'package:my_app/repositories/workout_repository.dart';
-import 'package:my_app/lib/widgets/stopwatch_dialog.dart';
+import 'package:my_app/widgets/stopwatch_dialog.dart';
 
 // 1. Implementação FALSA do repositório, como no seu exemplo.
 // Isso isola nosso teste de dependências externas (como arquivos).
